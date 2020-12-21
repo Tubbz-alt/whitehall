@@ -21,6 +21,21 @@ When(/^I draft a new consultation "([^"]*)"$/) do |title|
   click_button "Save"
 end
 
+When(/^I draft a new "(.*?)" language consultation "(.*?)"$/) do |locale, title|
+  begin_drafting_document type: "consultation", title: title, locale: locale, summary: "consultation-summary", alternative_format_provider: create(:alternative_format_provider), all_nation_applicablity: false
+  fill_in "Link URL", with: "http://participate.com"
+  fill_in "Email", with: "participate@gov.uk"
+  select_date 1.day.ago.to_s, from: "Opening Date"
+  select_date 6.days.from_now.to_s, from: "Closing Date"
+
+  within record_css_selector(Nation.find_by_name!("Wales")) do
+    check "Wales"
+    fill_in "URL of corresponding content", with: "http://www.visitwales.co.uk/"
+  end
+  check "Scotland"
+  click_button "Save"
+end
+
 Then(/^I can see links to the consultations "([^"]*)" and "([^"]*)"$/) do |title1, title2|
   assert has_css?(".consultation a", text: title1)
   assert has_css?(".consultation a", text: title2)
@@ -72,4 +87,11 @@ Then(/^I can see that the consultation has been published$/) do
   expected_message = "The document #{expected_title} has been published"
 
   assert_selector ".flash", text: expected_message
+end
+
+And(/^I can see the primary locale for consultation "(.*?)" is "(.*?)"$/) do |title, locale_code|
+  I18n.with_locale(locale_code) do
+    consultation = Consultation.find_by!(title: title)
+    assert_equal locale_code, consultation.primary_locale
+  end
 end

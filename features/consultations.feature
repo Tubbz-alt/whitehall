@@ -42,3 +42,9 @@ Scenario: Associating an offsite consultation with topical events
   When I am on the edit page for consultation "Beard Length Review"
   And I mark the consultation as offsite
   Then the consultation can be associated with topical events
+
+@javascript
+Scenario: Creating a new draft consultation in another language
+  Given I am a writer
+  When I draft a new "Cymraeg" language consultation "Beard Length Review"
+  Then I can see the primary locale for consultation "Beard Length Review" is "cy"
